@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 const cors = require("cors");
 
+const jwt           = require('jsonwebtoken');
+var expressJWT      = require('express-jwt');
+
 app.use(express.json());
 
 
@@ -31,6 +34,34 @@ MongoClient.connect(url, function(err, client) {
  console.log("Connexion réussi avec Mongo");
  db = client.db(dbName);
 });
+
+
+
+    //4) Partie JWT
+    // SECRET FOR JWT
+let secret = 'gk2023'; // a secret key is set here
+
+/* Create token to be used */
+
+/* Create token to be used */
+app.get('/token/sign', (req, res) => {
+    // vérifier si un user admet le login et le mot de passe
+    var userData = {
+        "name": "Amine Mezghich",
+        "id": "1234",
+        "role":"Chef de projet"
+    }
+    let token = jwt.sign(userData, secret, { expiresIn: '10000s'})
+    res.status(200).json({"token": token});
+});
+
+app.use(expressJWT({ secret: secret, algorithms: ['HS256']})
+    .unless( // This allows access to /token/sign without token authentication
+        { path: [
+            //'/token/sign','/countries'
+            '/token/sign',
+        ]}
+    ));
 
 // 3) Création api (endpoints)
 
